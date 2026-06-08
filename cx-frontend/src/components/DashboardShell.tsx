@@ -33,7 +33,7 @@ export function DashboardShell({ title, navItems, requiredRole, children }: Prop
       return;
     }
     setUser(u);
-  }, [requiredRole, router]);
+ }, [requiredRole, navigate]);
 
   const handleLogout = () => {
     clearUser();
