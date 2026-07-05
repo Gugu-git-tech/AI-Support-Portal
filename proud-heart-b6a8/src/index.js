@@ -154,32 +154,44 @@ export default {
     // =====================
     // LOGIN
     // =====================
-    if (path === "/auth/login" && method === "POST") {
-      const { email, password } = await request.json();
- 
-      const user = await env.DB.prepare(
-        "SELECT * FROM users WHERE email = ?"
-      ).bind(email).first();
- 
-      if (!user) {
-        return corsResponse({ error: "Invalid credentials" }, 401);
-      }
- 
-      const valid = await bcrypt.compare(password, user.password_hash);
- 
-      if (!valid) {
-        return corsResponse({ error: "Invalid credentials" }, 401);
-      }
- 
-      const token = jwt.sign(
-        { id: user.id, role: user.role },
-        env.JWT_SECRET,
-        { expiresIn: "7d" }
-      );
- 
-      return corsResponse({ token });
-    }
- 
+   ``
+// ✅ FIXED LOGIN ROUTE
+
+if (path === "/auth/login" && method === "POST") {
+  const { email, password } = await request.json();
+
+  const user = await env.DB.prepare(
+    "SELECT * FROM users WHERE email = ?"
+  ).bind(email).first();
+
+  if (!user) {
+    return corsResponse({ error: "Invalid credentials" }, 401);
+  }
+
+  const valid = await bcrypt.compare(password, user.password_hash);
+
+  if (!valid) {
+    return corsResponse({ error: "Invalid credentials" }, 401);
+  }
+
+  const token = jwt.sign(
+    { id: user.id, role: user.role },
+    env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+
+  // ✅ RETURN USER + TOKEN (THIS IS THE FIX)
+  return corsResponse({
+    token,
+    user: {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    },
+  });
+}
+
+
     // =====================
     // ME
     // =====================
